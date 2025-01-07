@@ -7,18 +7,21 @@ public class MainHomework7App {
         Transport horse = new Horse(50);
         Transport bycicle = new Bycicle();
         Human subject = new Human("Подопытный №1", 200);
-        subject.sit(car);
+        subject.getOn(car);
         subject.move(20,Terrain.FOREST);
         subject.move(20, Terrain.PLAIN);
-        subject.sit(suv);
+        subject.getOff();
+        subject.getOn(suv);
         subject.move(30, Terrain.SWAMP);
         subject.move(200, Terrain.FOREST);
-        subject.sit(bycicle);
+        subject.getOn(bycicle);
+        subject.getOff();
+        subject.getOn(bycicle);
         subject.move(20, Terrain.SWAMP);
         subject.move(20, Terrain.PLAIN);
-        subject.stand();
+        subject.getOff();
         subject.move(10, Terrain.SWAMP);
-        subject.sit(horse);
+        subject.getOn(horse);
         subject.move(20,Terrain.FOREST);
     }
 }

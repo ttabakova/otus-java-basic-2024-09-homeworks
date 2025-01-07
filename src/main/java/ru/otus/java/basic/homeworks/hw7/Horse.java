@@ -2,9 +2,22 @@ package ru.otus.java.basic.homeworks.hw7;
 
 public class Horse implements Transport {
     private int stamina;
+    private Human driver;
 
     public Horse(int stamina) {
         this.stamina = stamina;
+    }
+
+    @Override
+    public void getOn(Human driver) {
+        this.driver = driver;
+        System.out.println(driver.getName() + " сел на лошадь");
+    }
+
+    @Override
+    public void getOff() {
+        System.out.println(driver.getName() + " слез с лошади");
+        this.driver = null;
     }
 
     @Override
@@ -24,8 +37,5 @@ public class Horse implements Transport {
         }
     }
 
-    @Override
-    public void sitInfo() {
-        System.out.println("Человек сел на лошадь");
-    }
+
 }

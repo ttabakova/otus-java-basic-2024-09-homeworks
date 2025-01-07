@@ -5,19 +5,35 @@ public class Human {
     private Transport currentTransport;
     private int stamina;
 
+    public String getName() {
+        return name;
+    }
+
+    public int getStamina() {
+        return stamina;
+    }
+
+    public void setStamina(int stamina) {
+        this.stamina = stamina;
+    }
+
     public Human(String name, int stamina) {
         this.name = name;
         this.stamina = stamina;
     }
 
-    public void sit(Transport transport) {
+    public void getOn(Transport transport) {
+        if (this.currentTransport!=null){
+            System.out.println("Необходимо слезть с текущего транспорта");
+            return;
+        }
         this.currentTransport = transport;
-        currentTransport.sitInfo();
+        currentTransport.getOn(this);
     }
 
-    public void stand() {
+    public void getOff() {
+        currentTransport.getOff();
         this.currentTransport = null;
-        System.out.println("Человек слез с транспорта");
     }
 
     public void move(int distance, Terrain terrain) {
