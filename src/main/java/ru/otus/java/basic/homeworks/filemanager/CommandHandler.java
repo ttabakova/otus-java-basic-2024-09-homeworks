@@ -61,8 +61,9 @@ public class CommandHandler {
                 else fileManager.createDir(command[1]);
                 return;
             case "rm":
-                if (command.length != 2) wrongFormat();
-                else fileManager.deleteFile(command[1]);
+                if (command.length == 2) fileManager.deleteFile(command[1],false);
+                else if (command.length == 3 && command[2].equalsIgnoreCase("-f")) fileManager.deleteFile(command[1],true);
+                else wrongFormat();
                 return;
             case "mv":
                 if (command.length == 3) fileManager.moveFile(command[1], command[2], false);

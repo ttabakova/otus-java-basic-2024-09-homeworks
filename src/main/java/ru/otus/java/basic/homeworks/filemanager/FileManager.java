@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
@@ -66,32 +65,21 @@ public class FileManager {
     }
 
     /**
-     * Удаляет файл или директорию по указанному пути. При попытке удалить непустую директорию спрашивает, удалить ли вложенные файлы
-     * (y - удалить, n - выйти без удаления)
+     * Удаляет файл или директорию по указанному пути, с возможностью удаления вложенных файлов
      *
      * @param name имя удаляемого файла или директории
+     * @param force включает опцию удаления вложенных файлов: true - удалять, false - выход без удаления
      */
-    public void deleteFile(String name) {
+    public void deleteFile(String name, boolean force) {
         Path path = root.resolve(name);
         File toDelete = path.toFile();
         if (!toDelete.exists()) {
             System.out.println("Файл " + path + " не существует");
-        } else if (toDelete.isDirectory() & toDelete.list() != null) {
-            System.out.println("Директория " + path + " не пуста.");
-            listFiles(path.toString(), false);
-            System.out.println("Удалить вложенные файлы? y|n");
-            String input;
-            while (true) {
-                Scanner in = new Scanner(System.in);
-                input = in.nextLine();
-                if (input.equalsIgnoreCase("y")) {
-                    System.out.println("Удаляем вложенные файлы...");
-                    deleteAll(toDelete);
-                    break;
-                } else if (input.equalsIgnoreCase("n")) {
-                    return;
-                } else System.out.println("Неверный формат. Введите y или n");
-            }
+        } else if (toDelete.isDirectory() && toDelete.list().length>0) {
+            if (force) {
+                System.out.println("Удаляем вложенные файлы...");
+                deleteAll(toDelete);
+            } else System.out.println("Директория " + path + " не пуста. rm -f для удаления вложенных файлов");
         } else {
             if (toDelete.delete()) System.out.println("Файл " + path + " успешно удален");
             else System.out.println("Не смогли удалить файл " + path);
