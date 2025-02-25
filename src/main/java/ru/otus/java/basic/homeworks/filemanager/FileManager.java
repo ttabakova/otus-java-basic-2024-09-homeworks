@@ -1,94 +1,21 @@
 package ru.otus.java.basic.homeworks.filemanager;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class FileManager {
     private Path dir;
-    private final Scanner in;
 
     public FileManager(String dir) {
         this.dir = Paths.get(dir).toAbsolutePath();
-
-        System.out.println("""
-                Добро пожаловать в файловый менеджер "На коленке"!
-                Получить список доступных команд - введите help.""");
-        in = new Scanner(System.in);
-        while (true) {
-            System.out.print("""
-                    
-                    """ + this.dir + '>');
-            String input = in.nextLine();
-            if (input.equalsIgnoreCase("exit")) {
-                System.out.println("Спасибо за использование нашего файлового менеджера!");
-                break;
-            }
-            execute(input);
-        }
-    }
-
-    public void execute(String input) {
-        String[] command = input.split(" ");
-        switch (command[0]) {
-            case "help":
-                sendHelp();
-                return;
-            case "ls":
-                if (command.length == 1) listFiles(dir.toString(), false);
-                else if (command.length == 2 && command[1].equalsIgnoreCase("-i"))
-                    listFiles(dir.toString(), true);
-                else wrongFormat();
-                return;
-            case "cd":
-                if (command.length != 2) wrongFormat();
-                else setDir(command[1]);
-                return;
-            case "mkdir":
-                if (command.length != 2) wrongFormat();
-                else createDirectory(command[1]);
-                return;
-            case "rm":
-                if (command.length != 2) wrongFormat();
-                else delete(command[1]);
-                return;
-            case "mv":
-                if (command.length == 3) moveFile(command[1], command[2], false);
-                else if (command.length == 4 && command[3].equalsIgnoreCase("-f"))
-                    moveFile(command[1], command[2], true);
-                else wrongFormat();
-                return;
-            case "cp":
-                if (command.length == 3) copyFile(command[1], command[2], false);
-                else if (command.length == 4 && command[3].equalsIgnoreCase("-f"))
-                    copyFile(command[1], command[2], true);
-                else wrongFormat();
-                return;
-            case "finfo":
-                if (command.length != 2) wrongFormat();
-                else finfo(command[1]);
-        }
-    }
-
-    public void sendHelp() {
-        try (BufferedReader helpReader = new BufferedReader(new FileReader("src/main/resources/help.txt"))) {
-            String line;
-            while ((line = helpReader.readLine()) != null) {
-                System.out.println(line);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public void listFiles(String path, boolean details) {
@@ -110,11 +37,10 @@ public class FileManager {
         if (dir.equalsIgnoreCase("..")) {
             path = this.dir.getParent();
         } else path = this.dir.resolve(dir);
-        System.out.println("Привели путь к " + path);
         this.dir = path.toAbsolutePath();
     }
 
-    public void createDirectory(String name) {
+    public void createDir(String name) {
         Path path = dir.resolve(name);
         if (!path.toFile().mkdir()) {
             System.out.println("Директория " + path + " уже существует");
@@ -123,7 +49,7 @@ public class FileManager {
         }
     }
 
-    public void delete(String name) {
+    public void deleteFile(String name) {
         Path path = dir.resolve(name);
         File toDelete = path.toFile();
         if (!toDelete.exists()) {
@@ -134,6 +60,7 @@ public class FileManager {
             System.out.println("Удалить вложенные файлы? y|n");
             String input;
             while (true) {
+                Scanner in = new Scanner(System.in);
                 input = in.nextLine();
                 if (input.equalsIgnoreCase("y")) {
                     System.out.println("Удаляем вложенные файлы...");
@@ -198,24 +125,50 @@ public class FileManager {
             System.out.println(file.getName() + ", " + file.length() / 1024 + "кб, " + Instant.ofEpochMilli(file.lastModified()));
     }
 
+    public void findFile(String name) {
+        ArrayList<Path> found = new ArrayList<>();
+        addFiles(name, dir, found);
+        if (!found.isEmpty()) {
+            System.out.println("Найдено файлов: "+found.size());
+            for (Path path : found) {
+                System.out.println(path.toAbsolutePath());
+            }
+        } else System.out.println("Ничего не найдено");
+    }
+
+    public Path getDir() {
+        return dir;
+    }
+
+    @Override
+    public String toString() {
+        return dir.toString();
+    }
+
     private void deleteAll(File toDelete) {
         File[] files = toDelete.listFiles();
         if (files != null) {
-            File file;
-            Iterator<File> fileIterator = Arrays.stream(files).iterator();
-            while (fileIterator.hasNext()) {
-                file = fileIterator.next();
-                deleteAll(file);
+            for (File value : files) {
+                deleteAll(value);
             }
         }
-        if (toDelete.delete()){
-            System.out.println("Файл успешно удален: "+toDelete.getName());
-        }else {
-            System.out.println("не смогли удалить файл: "+toDelete.getName());
+        if (toDelete.delete()) {
+            System.out.println("Файл успешно удален: " + toDelete.getName());
+        } else {
+            System.out.println("Не смогли удалить файл: " + toDelete.getName());
         }
     }
 
-    private void wrongFormat() {
-        System.out.println("Неверный формат команды. Получить список доступных команд - введите help.");
+    private void addFiles(String name, Path path, ArrayList<Path> found) {
+        File file = path.toFile();
+        if (file.getName().equalsIgnoreCase(name)){
+            found.add(path.toAbsolutePath());
+        }
+        File[] fileList = file.listFiles();
+        if (fileList != null) {
+            for (File filei : fileList) {
+                addFiles(name, path.resolve(filei.getName()), found);
+            }
+        }
     }
 }
