@@ -8,6 +8,12 @@ import java.util.Scanner;
 public class CommandHandler {
     private final FileManager fileManager;
 
+    /**
+     * Конструктор и инициализатор консоли для работы с указанным файловым менеджером.
+     * Выводит в консоль приветственное сообщение и путь к корневой директории, ожидает ввод пользователя.
+     * В случае ввода команды выхода "exit" завершает работу. В случае иного ввода, пытается выполнить введенную команду.
+     * @param fileManager - экземпляр файлового менеджера для работы
+     */
     public CommandHandler(FileManager fileManager) {
         this.fileManager = fileManager;
         System.out.println("""
@@ -27,6 +33,13 @@ public class CommandHandler {
         }
     }
 
+    /**
+     * Обработка команды: проверяет, что команда находится в списке допустимых команд.
+     * В случае успеха, проверяет необходимое количество атрибутов для исполнения и корректность ключевых слов
+     * В случае успеха, исполняет команду.
+     * Иначе, выводит сообщение об ошибке
+     * @param input - команда
+     */
     public void execute(String input) {
         String[] command = input.split(" ");
         switch (command[0]) {
@@ -34,14 +47,14 @@ public class CommandHandler {
                 sendHelp();
                 return;
             case "ls":
-                if (command.length == 1) fileManager.listFiles(fileManager.getDir().toString(), false);
+                if (command.length == 1) fileManager.listFiles(fileManager.getRoot().toString(), false);
                 else if (command.length == 2 && command[1].equalsIgnoreCase("-i"))
-                    fileManager.listFiles(fileManager.getDir().toString(), true);
+                    fileManager.listFiles(fileManager.getRoot().toString(), true);
                 else wrongFormat();
                 return;
             case "cd":
                 if (command.length != 2) wrongFormat();
-                else fileManager.setDir(command[1]);
+                else fileManager.setRoot(command[1]);
                 return;
             case "mkdir":
                 if (command.length != 2) wrongFormat();
@@ -73,6 +86,9 @@ public class CommandHandler {
         }
     }
 
+    /**
+     * Вывод списка команд из текстового файла
+     */
     public void sendHelp() {
         try (BufferedReader helpReader = new BufferedReader(new FileReader("src/main/resources/help.txt"))) {
             String line;
@@ -84,6 +100,9 @@ public class CommandHandler {
         }
     }
 
+    /**
+     * Вывод сообщения об ошибке в случае неверно введенной команды
+     */
     private void wrongFormat() {
         System.out.println("Неверный формат команды. Получить список доступных команд - введите help.");
     }
